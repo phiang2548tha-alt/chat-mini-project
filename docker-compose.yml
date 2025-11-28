@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  chatserver:
+    build: ./chatserver
+    container_name: chat_server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./chatserver:/app
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: chat_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - chatserver
+    restart: always
