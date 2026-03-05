@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Messaging Chat</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">💬 Real-time Messaging</div>
+
+      <div id="chat" class="chat-box"></div>
+
+      <div class="input-area">
+        <input id="msg" placeholder="Type message..." />
+        <button onclick="send()">Send</button>
+      </div>
+    </div>
+
+    <script>
+      const chat = document.getElementById("chat");
+      const input = document.getElementById("msg");
+
+      function addMessage(text, type = "other") {
+        const div = document.createElement("div");
+        div.className = "message " + type;
+        div.innerText = text;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      // โหลด history
+      fetch("http://" + window.location.host + "/history")
+        .then((res) => res.json())
+        .then((data) => {
+          data.forEach((msg) => {
+            addMessage(msg[0], "other");
+          });
+        });
+
+      // WebSocket
+      const ws = new WebSocket("ws://" + window.location.host + "/ws");
+
+      ws.onmessage = (event) => {
+        addMessage(event.data, "other");
+      };
+
+      function send() {
+        if (input.value.trim() === "") return;
+
+        ws.send(input.value);
+        input.value = "";
+      }
+
+      input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          send();
+        }
+      });
+    </script>
+  </body>
+</html>
